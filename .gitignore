@@ -1,3 +1,0 @@
-*.env
-wargame/wargame_backend/*.txt
-wargame/wargame_backend/node_modules
