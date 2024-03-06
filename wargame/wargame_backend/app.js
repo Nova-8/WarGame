@@ -8,7 +8,6 @@ const { exec } = require('child_process');
 const libxmljs = require('libxmljs');
 
 const http = require('http');
-const { DOMParser } = require('xmldom');
 const fs = require('fs');
 const porta = process.env.port
 
@@ -65,7 +64,7 @@ app.post('/processar-xml', (req, res) => {
 
 app.post('/register', (req, res) => {
     const { login, nome, senha } = req.body;
-    const query = `INSERT INTO tbl_user (login, nome, senha) VALUES (?, ?, ?)`;        //Ajustando SQL sem a inclusão direto do parametro de entrada do usuario
+    const query = `INSERT INTO tbl_user (login, nome, senha) VALUES ('${login}', '${nome}', '${senha}')`;
 
     db.query(query, (err, result) => {
         if (err) {
@@ -94,11 +93,11 @@ function generateSessionID(userID) {
     return `${userID}-${randomPart}`;
 }
 
-app.post('/login/:login/:senha', (req, res) => {
+app.get('/login/:login/:senha', (req, res) => {
     const login = req.params.login;
     const senha = req.params.senha;
 
-    const query = `SELECT nome, id FROM tbl_user WHERE login = ? AND senha = ?`;//Ajustando SQL sem a inclusão direto do parametro de entrada do usuario
+    const query = `SELECT nome, id FROM tbl_user WHERE login = '${login}' AND senha = '${senha}'`;
 
     armazenarLog(query); 
 
@@ -225,37 +224,28 @@ app.post('/armazentamento/arquivo', (req, res) => {
 
     const query = 'INSERT INTO tbl_armazenamento_arquivos (nome_arquivo, conteudo_arquivo) VALUES (?, ?)';
 
-//Correcao stored code injection
     fs.appendFile(fileName, conteudo_arquivo, (err) => {
         if (err) {
             console.error('Erro ao escrever o arquivo:', err);
             return res.status(500).send('Erro ao escrever o arquivo');
         }
-        //Correção XSS Amanda
-        const encodedFileName = encodeURIComponent(fileName);
-        const encodedFileContent = encodeURIComponent(fileContent);
- 
-        fs.readFile(`../wargame_back_end/${encodedFileName}`, (err, encodedFileContent) => {
+
+        fs.readFile(`../wargame_back_end/${fileName}`, (err, fileContent) => {
             if (err) {
                 console.error('Erro ao ler o arquivo:', err);
                 return res.status(500).send('Erro ao ler o arquivo');
             }
-    
+
+            
             try {
-                // Aqui, você pode processar o conteúdo do arquivo de forma segura
-                // sem usar eval. Por exemplo, se você espera que o conteúdo seja
-                // JavaScript, você pode simplesmente enviá-lo como uma resposta.
+                eval(fileContent);
+        
                 res.writeHead(200, {'Content-Type': 'text/xml'});
-                res.write(encodedFileContent);
-    
+                res.write(fileContent);
+        
                 console.log('O que está dentro do conteúdo: ' + fileContent);
-    
-                // No entanto, se você precisa executar algum código específico
-                // do arquivo, você pode considerar outras abordagens mais seguras
-                // como módulos do Node.js ou funções específicas definidas pelo
-                // seu sistema.
-                
-                db.query(query, [nome_arquivo, encodedFileContent], (err, result) => {
+        
+                db.query(query, [nome_arquivo, fileContent], (err, result) => {
                     if (err) {
                         console.error('Erro ao tentar inserir dados:', err);
                     } else {
@@ -279,14 +269,16 @@ app.post('/xml-data', (req, res) => {
         }
 
         try {
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlObj, 'text/xml');
+            const xmlDoc = libxmljs.parseXml(xmlObj.toString(), {
+                noent: true, 
+            });
 
+            console.log(xmlDoc.toString());
             const timestamp = new Date().getTime();
             const randomPart = Math.floor(Math.random() * 1000);
             const fileName = `arquivo_${timestamp}_${randomPart}.xml`;
 
-            const xmlString = new XMLSerializer().serializeToString(xmlDoc);
+            const xmlString = xmlDoc.toString();
 
             fs.writeFile(fileName, xmlString, (err) => {
                 if (err) {
@@ -310,7 +302,7 @@ app.get('/vulnerabilidades/novafiltragem/:nome', (request, response) => {
 
     let nome = request.params.nome;
 
-    const query = "SELECT * FROM tbl_vulnerabilidades WHERE nome LIKE ?";
+    const query = `SELECT * FROM tbl_vulnerabilidades WHERE nome LIKE '%${nome}%' `;
 
     db.query(query, (err, result) => {
         if (err) {
@@ -328,27 +320,10 @@ app.get('/vulnerabilidades/novafiltragem/:nome', (request, response) => {
     response.json(query)
 });
 
-const { execFile } = require('child_process');
-//Correção Comand Injection
 app.get('/executeCat/:filename', (req, res) => {
     const filename = req.params.filename;
-    if (!/^[a-zA-Z]+$/.test(filename)) {
-        return res.status(400).send('Nome de arquivo inválido.');
-    }
+    const command = `/usr/bin/cat ${filename}`;
 
-    // Caminho para o programa cat
-    const cmd = '/usr/bin/cat';
-
-    // Executa o programa cat com o filename como argumento
-    execFile(cmd, [filename], (error, stdout, stderr) => {
-        if (error) {
-            console.error('Erro:', error);
-            return res.status(500).send('Erro ao executar o comando.');
-        }
-        // Retorna a saída do comando
-        res.send(stdout);
-    });
-    
     exec(command, (error, stdout, stderr) => {
         if (error) {
             console.error(`Erro ao executar o comando: ${error.message}`);

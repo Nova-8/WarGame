@@ -30,9 +30,9 @@ function buscarVulnerabilidades(nome) {
                         </div>
                     `;
 
-                    cardContent.innerText = card
+                    cardContent.innerHTML = card
 
-                    card.innerText = cardContent;
+                    card.innerHTML = cardContent;
 
                     cards.appendChild(card);
                 });
@@ -43,7 +43,7 @@ function buscarVulnerabilidades(nome) {
                 mensagem.innerText = "Nenhum dado encontrado na tabela de vulnerabilidades.";
                 cards.appendChild(mensagem);
 
-                cards.innerText = `${input.value}`; //CORRIGIDO AQUI
+                cards.innerText = `${input.value}`;
                 
             }
         })
@@ -53,6 +53,6 @@ function buscarVulnerabilidades(nome) {
 function filtrar() {
     input = document.getElementById('inputBusca');
     var filter = input.value.toUpperCase();
-//comentário
+
     buscarVulnerabilidades(filter);
 }
