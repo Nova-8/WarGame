@@ -1,4 +1,4 @@
-# WarGame - Nova8
+# WarGame - Nova81
 
 <div align="center">
   <img src="./img/wargame-nova8.png" alt="WarGame_Checkmarx_One" width="700">
