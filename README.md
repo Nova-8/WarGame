@@ -10,6 +10,7 @@
 Este repositório introduz o WarGame, no qual é um WebGoat em JavaScript, sendo desenvolvido pela equipe de consultoria da Nova8,
 com o intuito de dar um treinamento para toda Nova8, afim de aprender como resolver algumas vulnerabilidades, como SQL Injection, DOM XSS, XXE entre várias outras vulnerabilidades.
 
+
 ---
 ## Sumário   
 - [Introdução WarGame](#introdução-wargame)
