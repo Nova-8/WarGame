@@ -1,0 +1,46 @@
+version: '3'
+services:
+
+  db_wargame:
+    container_name: db_wargame
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: wargame_mysql:v1.0
+    environment:
+      MYSQL_DATABASE: 'db_wargame'
+      MYSQL_USER: 'db_wargame'
+      MYSQL_PASSWORD: 'war1234'
+      MYSQL_ROOT_PASSWORD: 'root1234'
+    networks:
+      backend:
+        ipv4_address: 192.168.100.10
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+  
+  wargame_backend:
+    container_name: wargame_backend
+    restart: on-failure
+    build:
+      context: wargame/
+      dockerfile: Dockerfile
+    image: 'wargame-webgoat:v1.0'
+    ports:
+      - 3000:3000
+    networks:
+      backend:
+        ipv4_address: 192.168.100.11
+    depends_on:
+      - db_wargame
+    links:
+      - db_wargame
+
+networks:
+  backend:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 192.168.100.0/24
+         gateway: 192.168.100.1
