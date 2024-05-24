@@ -25,9 +25,9 @@ app.use(express.text({ type: 'application/xml' }));
 dotenv.config();
 
 const db = mysql.createConnection({
-    host: process.env.DB_HOST || '192.168.100.10',
+    host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || 'root1234',
+    password: process.env.DB_PASSWORD || 'COLOQUE_A_SENHA_DO_BANCO_DE_DADOS_AQUI',
     port: process.env.DB_PORT || 3306,
     database: process.env.DB_NAME || 'db_wargame'
 });
