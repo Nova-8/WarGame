@@ -1,3 +1,5 @@
+create database db_wargame;
+
 use db_wargame;
 
 create table tbl_user (
