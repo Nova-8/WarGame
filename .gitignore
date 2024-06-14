@@ -1,4 +1,13 @@
-**/node_modules/**
-.vscode/
-.idea/
-**/**/.env
+# IDEs
+.vscode
+.idea
+
+# Dependency directories
+**/**node_modules
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# dotenv environment variables file
+*.env
